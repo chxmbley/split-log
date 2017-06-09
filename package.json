@@ -1,14 +1,23 @@
 {
   "name": "split-log",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Split-level logging to stdout and file",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "log", "logs", "logging", "file", "console", "split", "split-log",
-    "split-logs", "split-logging", "multiple", "syslog"
+    "log",
+    "logs",
+    "logging",
+    "file",
+    "console",
+    "split",
+    "split-log",
+    "split-logs",
+    "split-logging",
+    "multiple",
+    "syslog"
   ],
   "repository": {
     "type": "git",
