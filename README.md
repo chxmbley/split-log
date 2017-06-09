@@ -20,7 +20,7 @@ log.notice('Hear ye!')
 Choose from [syslog](http://www.kiwisyslog.com/help/syslog/index.html?protocol_levels.htm)-style log levels (0: **Emergency**, 1: **Alert**, 2: **Critical**, 3: **Error**, 4: **Warn**, 5: **Notice**, 6: **Info**, 7: **Debug**)...
 
 ```javascript
-// Log events at 'debug' level and lower
+// Log events at 'info' level and lower
 log.level = 'info'
 log.debug('Malformed request at object "Reactor"')
 log.emergency('Nuclear meltdown imminent!')
