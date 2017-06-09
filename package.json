@@ -6,6 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "log", "logs", "logging", "file", "console", "split", "split-log",
+    "split-logs", "split-logging", "multiple", "syslog"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jdChum/split-log.git"
