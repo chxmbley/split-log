@@ -45,9 +45,9 @@ class Log {
     })
     // Configured properties
     this.level     = opts.level     || 'notice'
-    this.prefix    = opts.prefix    || ''
+    this.prefix    = opts.prefix    || '%Y-%m%d %H:%M:%S -'
     this.showLabel = opts.showLabel || true
-    this.dir       = opts.dir       || path.join(__dirname, 'logs')
+    this.dir       = opts.dir       || path.resolve(path.join('./', 'logs'))
     this.stdout    = opts.stdout    || true
     this.file      = opts.file      || false
     this.filename  = opts.filename  || `log_${strftime('%Y%m%d_%H%M%S')}.txt`
@@ -94,7 +94,7 @@ class Log {
     if (!isObject(options)) {
       let output = this.prefix ? this.prefix + ' ' + options : options
       // File output
-      if (this.writeFile) {
+      if (this.file) {
         // Create directory and file if they do not exist
         if (!fs.existsSync(this.dir)) fs.mkdirSync(this.dir);
         if (!fs.existsSync(this.getFilepath()))

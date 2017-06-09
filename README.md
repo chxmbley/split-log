@@ -12,7 +12,7 @@ npm i split-log
 
 ```javascript
 const Log = require('split-log')
-let log = new Log({ writeFile: true })
+let log = new Log({ file: true })
 log.notice('Hear ye!')
 // Writes '[NOTICE] Hear ye!' to console and file
 ```
@@ -106,13 +106,13 @@ Creates a new `Log` with properties set by `options`
 ### `new Log([options])`
 
 * `options` Object (optional)
-  * `level` String (optional) - Specifies priority level based on [syslog](http://www.kiwisyslog.com/help/syslog/index.html?protocol_levels.htm) conventions or custom levels. Default is `notice`
-  * `stdout` Boolean (optional) - Whether to write log entries to stdout (console). Default is `true`
-  * `file` Boolean (optional) - Whether to write log entries to file. Default is `false`
-  * `filename` String (optional) - Name of file to which log entries are written. Default is `log_<YYYYMMDD_HHMMSS>.txt` where `<YYYYMMDD_HHMMSS>` is a string-formatted timestamp
-  * `dir` String (optional) - Specifies directory to store log files. Default is `./logs/` (**NOTE:** If `dir` does not exist, it will be created only when a log file is written)
+  * `level` String (optional) - Specifies priority level based on [syslog](http://www.kiwisyslog.com/help/syslog/index.html?protocol_levels.htm) conventions or custom levels. Default is `notice`.
+  * `stdout` Boolean (optional) - Whether to write log entries to stdout (console). Default is `true`.
+  * `file` Boolean (optional) - Whether to write log entries to file. Default is `false`.
+  * `filename` String (optional) - Name of file to which log entries are written. Default is `log_<YYYYMMDD_HHMMSS>.txt` where `<YYYYMMDD_HHMMSS>` is a string-formatted timestamp representing when the log instance was created.
+  * `dir` String (optional) - Specifies directory to store log files. Default is `./logs/` (**NOTE:** If `dir` does not exist, it will be created only when a log file is written).
   * `showLabel` Boolean (optional) - Whether to prepend `level` label to each log entry (ex. `[INFO] Some information`). Default is `true`
-  * `prefix` - String (optional) - String to prepend to each log entry (written *before* `label`). Supports [strftime](https://github.com/samsonjs/strftime) formatting for generating timestamps. Default is empty string.
+  * `prefix` - String (optional) - String to prepend to each log entry (written *before* `label`). Supports [strftime](https://github.com/samsonjs/strftime) formatting for generating timestamps. Default is timestamp in 'YYYY-MM-DD HH:MM:SS -' format.
 
 ### Instance Events
 
