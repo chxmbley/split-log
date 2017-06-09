@@ -1,0 +1,23 @@
+{
+  "name": "split-log",
+  "version": "1.0.0",
+  "description": "Split-level logging to stdout and file",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdChum/split-log.git"
+  },
+  "author": "Joshua Chumbley <chumbleyjd@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jdChum/split-log/issues"
+  },
+  "homepage": "https://github.com/jdChum/split-log#readme",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "strftime": "^0.10.0"
+  }
+}
