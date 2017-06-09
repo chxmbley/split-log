@@ -35,7 +35,7 @@ class Log {
           // Emit event with log info
           this.emit('entry', {
              timestamp: new Date()
-           , levelIindex: indexOf(this.getLevels(), l)
+           , levelIndex: indexOf(this.getLevels(), l)
            , level: l.toUpperCase()
            , prefix: this.prefix
            , msg: msg
@@ -76,7 +76,7 @@ class Log {
   set prefix(logPrefix) {
     this._prefix = logPrefix
   }
-  
+
   getFilepath() { // Output filepath
     return path.join(this.dir, this.filename)
   }
@@ -125,7 +125,7 @@ class Log {
           this.write(`[${newLevel.toUpperCase()}] ${msg}`)
           this.emit('entry', {
              timestamp: new Date()
-           , levelIindex: indexOf(this.getLevels(), l)
+           , levelIndex: indexOf(this.getLevels(), l)
            , level: l.toUpperCase()
            , prefix: this.prefix
            , msg: msg
