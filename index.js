@@ -8,7 +8,7 @@ const events     = require('events')
 
 // Third-party dependencies
 const strftime   = require('strftime')
-const { indexOf, concat, isObject, has, isString, pull, keys } = require('lodash')
+const { indexOf, concat, isObject, has, isString, pull, keys, isUndefined } = require('lodash')
 
 
 class Log {
@@ -32,11 +32,11 @@ class Log {
     // Configured properties
     this.level     = opts.level     || 'notice'
     this.prefix    = opts.prefix    || '%Y-%m-%d %H:%M:%S -'
-    this.showLabel = opts.showLabel || true
     this.dir       = opts.dir       || path.join('./', 'logs')
-    this.stdout    = opts.stdout    || true
-    this.file      = opts.file      || false
     this.filename  = opts.filename  || `log_${strftime('%Y%m%d_%H%M%S')}.txt`
+    this.showLabel = isUndefined(opts.showLabel) ? true : false
+    this.stdout    = isUndefined(opts.stdout) ? true : false
+    this.file      = isUndefined(opts.file) ? false : true
 
     events.EventEmitter.call(this)
   }
@@ -51,6 +51,7 @@ class Log {
         }
       }
       if (indexOf(this.getLevels(), this.level) >= indexOf(this.getLevels(), level)) {
+        console.log(this.showLabel)
         msg = this.showLabel ? `[${level.toUpperCase()}] ${msg}` : msg
         this.write(msg)
         // Emit event with log info
