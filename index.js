@@ -8,7 +8,7 @@ const events     = require('events')
 
 // Third-party dependencies
 const strftime   = require('strftime')
-const { indexOf, concat, isObject, has, isString, pull } = require('lodash')
+const { indexOf, concat, isObject, has, isString, pull, keys } = require('lodash')
 
 
 class Log {
@@ -27,32 +27,43 @@ class Log {
     this._custom_levels = []
     this._level = this._prefix = ''
     // Create methods for each level
-    this.getLevels().forEach( l => {
-      this[l] = msg => {
-        if (indexOf(this.getLevels(), this.level) >= indexOf(this.getLevels(), l)) {
-          msg = this.showLabel ? `(${l.toUpperCase()}) ${msg}` : msg
-          this.write(msg)
-          // Emit event with log info
-          this.emit('entry', {
-             timestamp: new Date()
-           , levelIndex: indexOf(this.getLevels(), l)
-           , level: l.toUpperCase()
-           , prefix: this.prefix
-           , msg: msg
-          })
-        }
-      }
-    })
+    for (let i in this.getLevels())
+      this._addPriorityMethod(this.getLevels()[i])
     // Configured properties
     this.level     = opts.level     || 'notice'
-    this.prefix    = opts.prefix    || '%Y-%m%d %H:%M:%S -'
+    this.prefix    = opts.prefix    || '%Y-%m-%d %H:%M:%S -'
     this.showLabel = opts.showLabel || true
-    this.dir       = opts.dir       || path.resolve(path.join('./', 'logs'))
+    this.dir       = opts.dir       || path.join('./', 'logs')
     this.stdout    = opts.stdout    || true
     this.file      = opts.file      || false
     this.filename  = opts.filename  || `log_${strftime('%Y%m%d_%H%M%S')}.txt`
 
     events.EventEmitter.call(this)
+  }
+
+  _addPriorityMethod(level) {
+    this[level] = msg => {
+      if (isObject(msg)) {
+        if (has(msg, this.level) && this.getLevels().includes(this.level))
+          return this[level](msg[this.level])
+        else if (has(msg, 'default')) {
+          return this[level](msg['default'])
+        }
+      }
+      if (indexOf(this.getLevels(), this.level) >= indexOf(this.getLevels(), level)) {
+        msg = this.showLabel ? `[${level.toUpperCase()}] ${msg}` : msg
+        this.write(msg)
+        // Emit event with log info
+        this.emit('entry', {
+           timestamp: new Date()
+         , levelIndex: indexOf(this.getLevels(), level)
+         , level: level.toUpperCase()
+         , prefix: this.prefix
+         , msg: msg
+        })
+        return msg
+      }
+    }
   }
 
   get level() { // Current level
@@ -78,15 +89,25 @@ class Log {
   }
 
   getFilepath() { // Output filepath
-    return path.join(this.dir, this.filename)
+    return path.resolve(path.join(this.dir, this.filename))
   }
 
   getLevels() { // Required & custom levels
     return concat(this._req_levels, this._custom_levels)
   }
 
-  levelIndex(level) {
-    return indexOf(this.getLevels(), level)
+  get levelIndex() {
+    return indexOf(this.getLevels(), this.level)
+  }
+
+  set levelIndex(index) {
+    if (this.getLevels()[index])
+      this.level = this.getLevels()[index]
+      return this.level
+  }
+
+  levelIndex() { // Deprecated in favor of log.levelIndex property
+    return this.levelIndex
   }
 
   write(options) { // Handle output
@@ -110,9 +131,8 @@ class Log {
       }
     // Split-output handling
     } else if (isObject(options)) {
-      if (has(options, this.level)) {
+      if (has(options, this.level) && isObject(options[this.level]))
         this[this.level](options[this.level])
-      }
     }
   }
 
@@ -120,18 +140,7 @@ class Log {
     if (isString(level)) {
       this._custom_levels.push(level)
       // Define method for custom level
-      this[level] = msg => {
-        if (indexOf(this.getLevels(), this.level) >= indexOf(this.getLevels(), level)) {
-          this.write(`[${newLevel.toUpperCase()}] ${msg}`)
-          this.emit('entry', {
-             timestamp: new Date()
-           , levelIndex: indexOf(this.getLevels(), l)
-           , level: l.toUpperCase()
-           , prefix: this.prefix
-           , msg: msg
-          })
-        }
-      }
+      this._addPriorityMethod(level)
       return this.getLevels()
     } else
       throw new Error('Custom level names must be type String')

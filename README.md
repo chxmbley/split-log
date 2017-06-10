@@ -1,5 +1,7 @@
 # Split Log
 
+[![NPM](https://nodei.co/npm/split-log.png)](https://nodei.co/npm/split-log/)
+
 > Split-level logging to multiple destinations
 
 ## Install
@@ -17,7 +19,7 @@ log.notice('Hear ye!')
 // Writes '[NOTICE] Hear ye!' to console and file
 ```
 
-Choose from [syslog](http://www.kiwisyslog.com/help/syslog/index.html?protocol_levels.htm)-style log levels (0: **Emergency**, 1: **Alert**, 2: **Critical**, 3: **Error**, 4: **Warn**, 5: **Notice**, 6: **Info**, 7: **Debug**)...
+Choose from [syslog](http://www.kiwisyslog.com/help/syslog/index.html?protocol_levels.htm)-style log levels (0: **Emergency**, 1: **Alert**, 2: **Critical**, 3: **Error**, 4: **Warn**, 5: **Notice**, 6: **Info**, 7: **Debug**)
 
 ```javascript
 // Log events at 'info' level and lower
@@ -28,7 +30,7 @@ log.emergency('Nuclear meltdown imminent!')
 // [EMERGENCY] Nuclear meltdown imminent!
 ```
 
-... or define custom levels
+Define custom levels
 
 ```javascript
 log.addLevel('sneeze')
@@ -39,25 +41,18 @@ log.sneeze('Achoo!')
 // [SNEEZE] Achoo!
 ```
 
-Log unique output based on the set log level rather than falling through to lower levels
+Change output based on the current priority level rather than relying on global information
 
 ```javascript
-log.level = 'error'
-log.write({
+log.level = 'info'
+log.error({
   info:  'Everything is going to be OK',
   warn:  'There might be a small problem',
   error: 'The world will end in five minutes',
   alert: 'This is all your fault'
 })
 // Output:
-// [ERROR] The world will end in five minutes
-log.write({
-  debug:    'Cannot find module "split-log"',
-  info:     'Space station telemetry went OK',
-  notice:   'Network latency has increased 578%',
-  critical: 'The CPU is on fire'
-})
-// No output since level is set to 'error'
+// [ERROR] Everything is going to be OK
 ```
 
 Split the log further with events!
@@ -70,7 +65,7 @@ const nodemailer = require('nodemailer')
 nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com')
 
 function sendBadNews(entry) {
-  // If the log entry is 'critical' or lower...
+  // If the log entry is 'error' or lower...
   if (entry.levelIndex <= 3) {
     // ... email the log entry to the sysadmin
     let msg = entry.msg
@@ -120,14 +115,40 @@ Objects created with `new Log` emit the following event:
 
 #### Event: 'entry'
 
+Emitted when a log entry is created. This event will be emitted even if both `log.stdout` and `log.file` are `false`.
+
 Returns:
 
 * `entry` Object
   * `timestamp` Date - When the entry was emitted
   * `level` String - Priority level that fired the event
-  * `levelIndex` Integer - Numeric representation of priority level that fired the event (lower numbers = higher priority)
+  * `levelIndex` Integer - Numeric representation of priority level that fired the event (lower numbers mean higher priority)
   * `prefix` String - Prefix or timestamp applied to log entry
   * `msg` String - Log message without `prefix` (will include label if `showLabel` is `true`)
+
+**Example:** Sending log entries to a logging server with [Needle](https://github.com/tomas/needle)
+
+```javascript
+const Log    = require('split-log')
+const needle = require('needle')
+
+let log = new Log({
+  level: 'warn', // only care about warnings and lower
+  file: false,   // disable logging to file
+  stdout: false, // disable logging to terminal
+})
+
+log.on('entry', entry => {
+  // POST entry object to logging server
+  needle.post('https://logging-endpoint.com/', entry, (err, resp) => {
+    if (err) throw err
+  })
+})
+
+log.warn('Upload me, Captain.')
+// No output on local machine
+// Sends data to logging endpoint
+```
 
 ### Instance Properties
 
@@ -136,6 +157,10 @@ Objects created with `new Log` have the following properties:
 #### `log.level`
 
 A `String` representing the current log level (must be an item returned in `log.getLevels()` array).
+
+#### `log.levelIndex`
+
+An `Integer` representing the index of `level` in relation to the `Array` returned by `log.getLevels()`, used for prioritizing log messages. Lower numbers mean higher priority.
 
 #### `log.stdout`
 
@@ -167,9 +192,9 @@ Objects created with `new Log` have the following instance methods:
 
 #### `log.[priority](message)`
 
-**All priority levels returned by `log.getLevels()` (including custom levels) can be used as instance methods.** Calling a level as a method writes `message` to logging destinations when `log.level` is set to a priority with a `levelIndex` at or above the method's level.
+**All priority levels returned by `log.getLevels()` (including custom levels) can be used as instance methods.** Calling a priority level as a method writes `message` to logging destinations when `log.level` is set to a priority with a `levelIndex` at or above the method's level.
 
-**Example:**
+**Example:** Sending strings to the log
 
 ```javascript
 log.level = 'notice' // log.levelIndex('notice') === 5
@@ -183,19 +208,54 @@ log.debug('Hark! A bug!') // log.levelIndex('debug') === 7
 // Output: [DEBUG] Hark! A bug!
 ```
 
+Priority methods also accept an `Object` of key-value pairs, where the keys represent priority levels and values represent messages to pass. Logging this way allows different information to be passed depending the priority level set in `log.level`.
+
+**Example:** Changing output based on priority level
+```javascript
+log.level = 'notice'
+
+log.error({
+  notice: 'Tell your supervisor there was a problem.',
+  error: 'There was a problem, boss.'
+})
+// Output: [ERROR] Tell your supervisor there was a problem.
+
+log.level = 'error'
+
+log.error({
+  notice: 'Tell your supervisor there was a problem.',
+  error: 'There was a problem, boss.'
+})
+// Output: [ERROR] There was a problem, boss.
+```
+
+Use a key named `default` to pass a default message if the current priority level isn't specified in the object.
+
+**Example 2:** Logging error details only during debugging
+
+```javascript
+log.level = 'notice'
+
+process.on('uncaughtException', e => {
+  log.error({
+    debug: e,
+    default: 'Oops! There was a problem!'
+  })
+})
+// Output: [ERROR] Oops! There was a problem!
+```
+
+**NOTE:** [Stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) objects that shouldn't be interpreted as priority levels. Unexpected object literals may produce unpredictable behavior.
+
 For writing messages exclusive to the level set at `log.level`, see `log.write(Object)`.
 
 #### `log.getLevels()`
 
 Returns an `Array` of available log levels, including default [syslog](http://www.kiwisyslog.com/help/syslog/index.html?protocol_levels.htm) levels and custom levels set by `log.addLevel`.
 
-#### `log.levelIndex(level)`
-
-Returns an `Integer` representing the index of `level` in relation to the `Array` returned by `log.getLevels()`, used for prioritizing log messages.
-
 #### `log.getFilepath()`
 
-Returns a `String` representing the absolute filepath to the current log file.
+Returns a `String` representing the absolute path to the current log file.
 
 #### `log.addLevel(level)`
 
@@ -240,6 +300,8 @@ log.write({
 })
 // Output: [WARN] I tried to tell you.
 ```
+
+**Note:** Assigning logging methods (such as `log.error`) directly to priority keys in `log.write` executes all methods contained in the object regardless of `log.level`. To change output based on the current priority level, use `log.[priority](Object)`.
 
 #### `log.write(message)`
 
