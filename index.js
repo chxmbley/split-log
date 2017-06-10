@@ -51,7 +51,6 @@ class Log {
         }
       }
       if (indexOf(this.getLevels(), this.level) >= indexOf(this.getLevels(), level)) {
-        console.log(this.showLabel)
         msg = this.showLabel ? `[${level.toUpperCase()}] ${msg}` : msg
         this.write(msg)
         // Emit event with log info
