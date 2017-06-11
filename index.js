@@ -41,7 +41,7 @@ class Log {
     this.file       = isUndefined(opts.file)       ? false : true
     this.emitHidden = isUndefined(opts.emitHidden) ? false : true
 
-    events.EventEmitter.call(this)
+    EventEmitter.call(this)
   }
 
   _addPriorityMethod(level) {
@@ -229,6 +229,6 @@ class Log {
 }
 
 
-Log.prototype.__proto__ = events.EventEmitter.prototype;
+Log.prototype.__proto__ = EventEmitter.prototype;
 
 module.exports = Log
