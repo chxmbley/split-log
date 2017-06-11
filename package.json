@@ -1,6 +1,6 @@
 {
   "name": "split-log",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Split-level logging to stdout and file",
   "main": "index.js",
   "keywords": [
