@@ -1,5 +1,6 @@
 # Split Log
 [![NPM](https://nodei.co/npm/split-log.png)](https://nodei.co/npm/split-log/)
+
 [![Build Status](https://api.travis-ci.org/jdChum/split-log.svg?branch=master)](https://travis-ci.org/jdChum/split-log)
 > Split-level logging to multiple destinations
 

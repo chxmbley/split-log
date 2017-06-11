@@ -3,9 +3,6 @@
   "version": "1.0.9",
   "description": "Split-level logging to stdout and file",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "log",
     "logs",
