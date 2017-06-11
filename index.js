@@ -25,18 +25,21 @@ class Log {
       , 'debug'
     ]
     this._custom_levels = []
-    this._level = this._prefix = ''
+    this._flevel = this._olevel = this._prefix = ''
     // Create methods for each level
     for (let i in this.getLevels())
       this._addPriorityMethod(this.getLevels()[i])
     // Configured properties
-    this.level     = opts.level     || 'notice'
-    this.prefix    = opts.prefix    || '%Y-%m-%d %H:%M:%S -'
-    this.dir       = opts.dir       || path.join('./', 'logs')
-    this.filename  = opts.filename  || `log_${strftime('%Y%m%d_%H%M%S')}.txt`
-    this.showLabel = isUndefined(opts.showLabel) ? true : false
-    this.stdout    = isUndefined(opts.stdout) ? true : false
-    this.file      = isUndefined(opts.file) ? false : true
+    this.level      = opts.level     || 'notice'
+    this.fileLevel  = opts.fileLevel || 'notice'
+    this.outLevel   = opts.outLevel  || 'notice'
+    this.prefix     = opts.prefix    || '%Y-%m-%d %H:%M:%S -'
+    this.dir        = opts.dir       || path.join('./', 'logs')
+    this.filename   = opts.filename  || `log_${strftime('%Y%m%d_%H%M%S')}.txt`
+    this.showLabel  = isUndefined(opts.showLabel)  ? true  : false
+    this.stdout     = isUndefined(opts.stdout)     ? true  : false
+    this.file       = isUndefined(opts.file)       ? false : true
+    this.emitHidden = isUndefined(opts.emitHidden) ? false : true
 
     events.EventEmitter.call(this)
   }
@@ -67,15 +70,41 @@ class Log {
   }
 
   get level() { // Current level
-    return this._level
+    return { file: this._flevel, stdout: this._olevel }
   }
 
-  set level(logLevel) { // Set level
+  set level(logLevel) { // Set level for file and stdout
+    if (isObject(logLevel)) {
+      if (has(logLevel, 'file')) this.fileLevel  = logLevel['file']
+      if (has(logLevel, 'stdout')) this.outLevel = logLevel['stdout']
+      return
+    }
+    this._level = this._olevel = logLevel
+  }
+
+  get fileLevel() {
+    return this._flevel
+  }
+
+  set fileLevel(logLevel) { // Set levels for file
     logLevel = logLevel.toLowerCase()
     if (!this.getLevels().includes(logLevel)) {
-      throw new Error(`Cannot set log level to '${logLevel}'`)
+      throw new Error(`Cannot set file log level to '${logLevel}'`)
     } else {
-      this._level = logLevel
+      this._flevel = logLevel
+    }
+  }
+
+  get outLevel() {
+    return this._olevel
+  }
+
+  set outLevel(logLevel) { // Set level for stdout
+    logLevel = logLevel.toLowerCase()
+    if (!this.getLevels().includes(logLevel)) {
+      throw new Error(`Cannot set stdout log level to '${logLevel}'`)
+    } else {
+      this._olevel = logLevel
     }
   }
 
@@ -104,6 +133,10 @@ class Log {
     if (this.getLevels()[index])
       this.level = this.getLevels()[index]
       return this.level
+  }
+
+  levelIndexOf(level) { // Returns priority index of a log level
+    return indexOf(this.getLevels(), level)
   }
 
   levelIndex() { // Deprecated in favor of log.levelIndex property

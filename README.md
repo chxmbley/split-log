@@ -104,17 +104,20 @@ Creates a new `Log` with properties set by `options`
 ### `new Log([options])`
 
 * `options` Object (optional)
-  * `level` String (optional) - Specifies priority level based on [syslog](http://www.kiwisyslog.com/help/syslog/index.html?protocol_levels.htm) conventions or custom levels. Default is `notice`.
+  * `level` String (optional) - Specifies priority level based on [syslog](http://www.kiwisyslog.com/help/syslog/index.html?protocol_levels.htm) conventions or custom levels to use when writing to both file and stdout. Default is `notice`.
+  * `fileLevel` String (optional) - Specifies priority level based on [syslog](http://www.kiwisyslog.com/help/syslog/index.html?protocol_levels.htm) conventions or custom levels to use when writing to file. Overrides level set in `level`. Default is `notice`.
+  * `outLevel` String (optional) - Specifies priority level based on [syslog](http://www.kiwisyslog.com/help/syslog/index.html?protocol_levels.htm) conventions or custom levels to use when writing to stdout. Overrides level set i `level`. Default is `notice`.
   * `stdout` Boolean (optional) - Whether to write log entries to stdout (console). Default is `true`.
   * `file` Boolean (optional) - Whether to write log entries to file. Default is `false`.
   * `filename` String (optional) - Name of file to which log entries are written. Default is `log_<YYYYMMDD_HHMMSS>.txt` where `<YYYYMMDD_HHMMSS>` is a string-formatted timestamp representing when the log instance was created.
   * `dir` String (optional) - Specifies directory to store log files. Default is `./logs/` (**NOTE:** If `dir` does not exist, it will be created only when a log file is written).
   * `showLabel` Boolean (optional) - Whether to prepend `level` label to each log entry (ex. `[INFO] Some information`). Default is `true`
   * `prefix` - String (optional) - String to prepend to each log entry (written *before* `label`). Supports [strftime](https://github.com/samsonjs/strftime) formatting for generating timestamps. Default is timestamp in 'YYYY-MM-DD HH:MM:SS -' format.
+  * `emitHidden` Bool (optional) - Whether to emit 'entry' event when calling a logging method that has no output and would otherwise be ignored.
 
 ### Instance Events
 
-Objects created with `new Log` emit the following event:
+Objects created with `new Log` emit the following events:
 
 #### Event: 'entry'
 
@@ -153,13 +156,47 @@ log.warn('Upload me, Captain.')
 // Sends data to logging endpoint
 ```
 
+#### Event: 'willWriteFile'
+
+Emitted *before* a log entry is written to the log file. This event will never be emitted while `log.file` is `false`
+
+Returns:
+
+* `file` Object
+  * `name` String - Base name of the file
+  * `path` String - Absolute path of the file
+  * `size` Integer - Size of file in bytes before the message has been written
+  * `modified` Date - Timestamp of when the file was last modified
+  * `age` Integer - Age of the file in seconds
+
+#### Event: 'writeFile'
+
+Emitted *after* a log entry is written to the log file. This event will never be emitted while `log.file` is `false`
+
+* `file` Object
+  * `name` String - Base name of the file
+  * `path` String - Absolute path of the file
+  * `size` Integer - Size of file in bytes after the message has been written
+  * `modified` Date - Timestamp of when the file was last modified (current time)
+  * `age` Integer - Age of the file in seconds
+
 ### Instance Properties
 
 Objects created with `new Log` have the following properties:
 
 #### `log.level`
 
-A `String` representing the current log level (must be an item returned in `log.getLevels()` array).
+```javascript
+this.fileLevel = 'info'
+this.outLevel  = 'debug'
+this.level // Returns {file:"info",stdout:"debug"}
+this.level = 'warn' // Sets both fileLevel and outLevel to "warn"
+this.level = {
+  file: 'error',
+  stdout: 'emergency'
+} // Sets fileLevel to "error" and outLevel to "emergency"
+
+A `Object` containing the current log levels for outputting to `file` and `stdout` (both values must be items returned in `log.getLevels()` array).
 
 #### `log.levelIndex`
 
