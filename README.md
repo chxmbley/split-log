@@ -1,9 +1,10 @@
 # Split Log
 [![NPM](https://nodei.co/npm/split-log.png)](https://nodei.co/npm/split-log/)
+[![Build Status](https://api.travis-ci.org/jdChum/split-log.svg?branch=master)](https://travis-ci.org/jdChum/split-log)
 > Split-level logging to multiple destinations
 
-<div style="text-align:center">
-<img src="https://user-images.githubusercontent.com/22750569/27007842-509907d4-4e26-11e7-9ba0-f4c8e710c015.gif"></div>
+<h1 style="text-align:center">
+<img src="https://user-images.githubusercontent.com/22750569/27007842-509907d4-4e26-11e7-9ba0-f4c8e710c015.gif"></h1>
 
 ## Install
 
