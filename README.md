@@ -123,6 +123,8 @@ Objects created with `new Log` emit the following events:
 
 Emitted when a log entry is created. This event will be emitted even if both `log.stdout` and `log.file` are `false`.
 
+By default, an 'entry' event is only emitted when a logging method at or below the level index set in `log.level` is called. Setting `log.emitHidden` to `true` will allow 'entry' events to be emitted any time a log method is called, regardless of `log.level`.
+
 Returns:
 
 * `entry` Object
@@ -178,7 +180,7 @@ Emitted *after* a log entry is written to the log file. This event will never be
   * `path` String - Absolute path of the file
   * `size` Integer - Size of file in bytes after the message has been written
   * `modified` Date - Timestamp of when the file was last modified (current time)
-  * `age` Integer - Age of the file in seconds
+  * `created` Integer - Age of the file in seconds
 
 ### Instance Properties
 

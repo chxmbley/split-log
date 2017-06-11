@@ -3,7 +3,6 @@
 // Native API
 const path       = require('path')
 const fs         = require('fs')
-const { stdout } = require('process')
 const events     = require('events')
 
 // Third-party dependencies
@@ -53,19 +52,17 @@ class Log {
           return this[level](msg['default'])
         }
       }
-      if (indexOf(this.getLevels(), this.level) >= indexOf(this.getLevels(), level)) {
-        msg = this.showLabel ? `[${level.toUpperCase()}] ${msg}` : msg
-        this.write(msg)
-        // Emit event with log info
-        this.emit('entry', {
-           timestamp: new Date()
-         , levelIndex: indexOf(this.getLevels(), level)
-         , level: level.toUpperCase()
-         , prefix: this.prefix
-         , msg: msg
-        })
-        return msg
-      }
+      msg = this.showLabel ? `[${level.toUpperCase()}] ${msg}` : msg
+      this.write(msg, level)
+      // Emit event with log info
+      this.emit('entry', {
+         timestamp: new Date()
+       , levelIndex: indexOf(this.getLevels(), level)
+       , level: level.toUpperCase()
+       , prefix: this.prefix
+       , msg: msg
+      })
+      return msg
     }
   }
 
@@ -79,7 +76,7 @@ class Log {
       if (has(logLevel, 'stdout')) this.outLevel = logLevel['stdout']
       return
     }
-    this._level = this._olevel = logLevel
+    this._flevel = this._olevel = logLevel
   }
 
   get fileLevel() {
@@ -108,6 +105,34 @@ class Log {
     }
   }
 
+  getLevels() { // Required & custom levels
+    return concat(this._req_levels, this._custom_levels)
+  }
+
+  get levelIndex() {
+    return {
+      file: indexOf(this.getLevels(), this.fileLevel),
+      stdout:  indexOf(this.getLevels(), this.outLevel)
+    }
+  }
+
+  set levelIndex(index) {
+    if (isObject(index)) {
+      if (has(index, 'file')) this.fileLevel = this.getLevels()[index['file']]
+      if (has(index, 'stdout')) this.outLevel = this.getLevels()[index['stdout']]
+      return
+    }
+    this.fileLevel = this.outLevel = this.getLevels()[index]
+  }
+
+  levelIndexOf(level) { // Returns priority index of a log level
+    return indexOf(this.getLevels(), level)
+  }
+
+  levelIndex() { // Deprecated in favor of log.levelIndex property
+    return this.levelIndex
+  }
+
   get prefix() { // Prepended string to output
     // Render timestamps
     return strftime(this._prefix)
@@ -121,46 +146,41 @@ class Log {
     return path.resolve(path.join(this.dir, this.filename))
   }
 
-  getLevels() { // Required & custom levels
-    return concat(this._req_levels, this._custom_levels)
-  }
 
-  get levelIndex() {
-    return indexOf(this.getLevels(), this.level)
-  }
 
-  set levelIndex(index) {
-    if (this.getLevels()[index])
-      this.level = this.getLevels()[index]
-      return this.level
-  }
-
-  levelIndexOf(level) { // Returns priority index of a log level
-    return indexOf(this.getLevels(), level)
-  }
-
-  levelIndex() { // Deprecated in favor of log.levelIndex property
-    return this.levelIndex
-  }
-
-  write(options) { // Handle output
+  write(options, level=null) { // Handle output
     // Output non-object
     if (!isObject(options)) {
       let output = this.prefix ? this.prefix + ' ' + options : options
       // File output
-      if (this.file) {
+      if (this.file && (!level || this.levelIndexOf(this.fileLevel) >= this.levelIndexOf(level))) {
+
         // Create directory and file if they do not exist
-        if (!fs.existsSync(this.dir)) fs.mkdirSync(this.dir);
-        if (!fs.existsSync(this.getFilepath()))
-          fs.writeFileSync(this.getFilepath(), '');
-        // Append message to log file
-        fs.appendFile(this.getFilepath(), output + '\r\n', err => {
-          if (err) throw new Error(lerr)
+        if (!fs.existsSync(this.dir)) fs.mkdirSync(this.dir)
+        if (!fs.existsSync(this.getFilepath())) fs.writeFileSync(this.getFilepath(), '')
+
+        let f = { name: this.filename, path: this.getFilepath() }
+        fs.stat(this.getFilepath(), (err, stats) => {
+          if (err) throw err
+          f.size = stats.size
+          f.modified = stats.mtime
+          f.created = stats.birthtime
+          this.emit('willWriteFile', f)
+          // Append message to log file
+          fs.appendFile(this.getFilepath(), output + '\r\n', err => {
+            if (err) throw new Error(err)
+            fs.stat(this.getFilepath(), (err, stats) => {
+              f.size = stats.size
+              f.modified = stats.mtime
+              this.emit('writeFile', f)
+              f = null
+            })
+          })
         })
       }
-      // Standard out
-      if (this.stdout) {
-        stdout.write(output + '\r\n')
+      // Standard output
+      if (this.stdout && (!level || this.levelIndexOf(this.outLevel) >= this.levelIndexOf(level))) {
+        console.log(output)
       }
     // Split-output handling
     } else if (isObject(options)) {
