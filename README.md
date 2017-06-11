@@ -1,8 +1,9 @@
 # Split Log
 
-[![NPM](https://nodei.co/npm/split-log.png)](https://nodei.co/npm/split-log/)
-
 > Split-level logging to multiple destinations
+
+<div style="text-align:center">
+<img src="https://user-images.githubusercontent.com/22750569/27007842-509907d4-4e26-11e7-9ba0-f4c8e710c015.gif">[![NPM](https://nodei.co/npm/split-log.png)](https://nodei.co/npm/split-log/)</div>
 
 ## Install
 
@@ -55,7 +56,7 @@ log.error({
 // [ERROR] Everything is going to be OK
 ```
 
-Split the log further with events!
+Split the log further with event listeners!
 
 **Example:** Using [Nodemailer](https://nodemailer.com/about/)
 
