@@ -1,11 +1,18 @@
-TODO: Add support for separating priority levels for stdout and file
-TODO: Add support for always firing 'entry' events when log method is called
-TODO: Allow log file size limit
+# Haven't started
 TODO: Allow custom levels to always be logged regardless of log.level
+TODO: Handle disk IO with better async
 TODO: Real-world compliance with syslog, Papertrail, and Windows eventvwr ?
 TODO: Work toward removing dependencies
 
+# Written but not tested
+
+# Sorta tested
+TODO: Add support for separating priority levels for stdout and file
+TODO: Add support for always firing 'entry' events when log method is called
+TODO: Allow log file size limit (using 'willWriteFile' and 'writeFile' events instead)
 TODO: Add events 'willWriteFile' and 'writeFile' that carry info about the file
       such as current date, file size, and changes
 
-TODO: Handle disk IO with better async
+# Updated docs
+
+# Ready

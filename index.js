@@ -54,15 +54,6 @@ class Log {
       }
       msg = this.showLabel ? `[${level.toUpperCase()}] ${msg}` : msg
       this.write(msg, level)
-      // Emit event with log info
-      this.emit('entry', {
-         timestamp: new Date()
-       , levelIndex: indexOf(this.getLevels(), level)
-       , level: level.toUpperCase()
-       , prefix: this.prefix
-       , msg: msg
-      })
-      return msg
     }
   }
 
@@ -181,6 +172,31 @@ class Log {
       // Standard output
       if (this.stdout && (!level || this.levelIndexOf(this.outLevel) >= this.levelIndexOf(level))) {
         console.log(output)
+      }
+      // Entry event
+      if (!this.emitHidden) {
+        let fl = this.levelIndexOf(this.fileLevel), // fileLevel index
+            ol = this.levelIndexOf(this.outLevel),  // outLevel index
+            el = fl > ol ? fl : ol                  // event level = greatest index
+        if (!level || el >= this.levelIndexOf(level)) {
+          // Emit event with log info
+          this.emit('entry', {
+             timestamp: new Date()
+           , levelIndex: indexOf(this.getLevels(), level)
+           , level: level.toUpperCase()
+           , prefix: this.prefix
+           , msg: output
+          })
+        }
+      } else {
+        // Emit event with log info
+        this.emit('entry', {
+           timestamp: new Date()
+         , levelIndex: indexOf(this.getLevels(), level)
+         , level: level.toUpperCase()
+         , prefix: this.prefix
+         , msg: output
+        })
       }
     // Split-output handling
     } else if (isObject(options)) {
