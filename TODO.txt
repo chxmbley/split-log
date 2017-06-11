@@ -1,8 +1,11 @@
-# Haven't started
-TODO: Allow custom levels to always be logged regardless of log.level
+# Thinking about it
 TODO: Handle disk IO with better async
 TODO: Real-world compliance with syslog, Papertrail, and Windows eventvwr ?
 TODO: Work toward removing dependencies
+
+# Gonna do it
+TODO: Allow custom levels to always be logged regardless of log.level
+TODO: Move specific examples to example scripts and link from README
 
 # Written but not tested
 

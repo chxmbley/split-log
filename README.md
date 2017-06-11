@@ -198,11 +198,11 @@ this.level = {
   stdout: 'emergency'
 } // Sets fileLevel to "error" and outLevel to "emergency"
 
-A `Object` containing the current log levels for outputting to `file` and `stdout` (both values must be items returned in `log.getLevels()` array).
+An `Object` containing the current log levels for outputting to `file` and `stdout` (both values must be items returned in `log.getLevels()` array). If `fileLevel` and `outLevel` are the same, returns a `String` representing the shared level.
 
 #### `log.levelIndex`
 
-An `Integer` representing the index of `level` in relation to the `Array` returned by `log.getLevels()`, used for prioritizing log messages. Lower numbers mean higher priority.
+An `Object` containing the indexes of `fileLevel` and `outLevel` in relation to the `Array` returned by `log.getLevels()`, used for prioritizing log messages. If `fileLevel` and `outLevel` are the same, returns an `Integer` representing the shared level. Lower numbers mean higher priority.
 
 #### `log.stdout`
 

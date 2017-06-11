@@ -1,13 +1,14 @@
 'use strict'
 
 // Native API
-const path       = require('path')
-const fs         = require('fs')
-const events     = require('events')
+const path             = require('path')
+const fs               = require('fs')
+const { EventEmitter } = require('events')
 
 // Third-party dependencies
-const strftime   = require('strftime')
-const { indexOf, concat, isObject, has, isString, pull, keys, isUndefined } = require('lodash')
+const strftime = require('strftime')
+const { indexOf, concat, isObject, has,
+        isString, pull, keys, isUndefined } = require('lodash')
 
 
 class Log {
@@ -58,7 +59,7 @@ class Log {
   }
 
   get level() { // Current level
-    return { file: this._flevel, stdout: this._olevel }
+    return this._flevel === this._olevel ? this._flevel : { file: this._flevel, stdout: this._olevel }
   }
 
   set level(logLevel) { // Set level for file and stdout
@@ -101,10 +102,10 @@ class Log {
   }
 
   get levelIndex() {
-    return {
-      file: indexOf(this.getLevels(), this.fileLevel),
-      stdout:  indexOf(this.getLevels(), this.outLevel)
-    }
+    let fi = indexOf(this.getLevels(), this.fileLevel),
+        oi = indexOf(this.getLevels(), this.outLevel)
+
+    return fi === oi ? fi : { file: fi, stdout: oi }
   }
 
   set levelIndex(index) {
