@@ -149,7 +149,10 @@ class Log {
 
         // Create directory and file if they do not exist
         if (!fs.existsSync(this.dir)) fs.mkdirSync(this.dir)
-        if (!fs.existsSync(this.getFilepath())) fs.writeFileSync(this.getFilepath(), '')
+        if (!fs.existsSync(this.getFilepath())) {
+          fs.writeFileSync(this.getFilepath(), '')
+          this.emit('createFile')
+        }
 
         let f = { name: this.filename, path: this.getFilepath() }
         fs.stat(this.getFilepath(), (err, stats) => {
@@ -157,14 +160,14 @@ class Log {
           f.size = stats.size
           f.modified = stats.mtime
           f.created = stats.birthtime
-          this.emit('willWriteFile', f)
+          this.emit('willWrite', f)
           // Append message to log file
           fs.appendFile(this.getFilepath(), output + '\r\n', err => {
             if (callback) callback(err)
             fs.stat(this.getFilepath(), (err, stats) => {
               f.size = stats.size
               f.modified = stats.mtime
-              this.emit('writeFile', f)
+              this.emit('write', f)
               f = null
             })
           })
