@@ -8,6 +8,7 @@ TODO: Allow custom levels to always be logged regardless of log.level
 TODO: Move specific examples to example scripts and link from README
 
 # Written but not tested
+TODO: Callbacks for logging methods (would like callback to execute no matter what)
 
 # Sorta tested
 TODO: Add support for separating priority levels for stdout and file

@@ -232,9 +232,11 @@ A `String` to prepend to log entries (before labels). Supports [strftime](https:
 
 Objects created with `new Log` have the following instance methods:
 
-#### `log.[priority](message)`
+#### `log.<level>(message[, callback])`
 
 **All priority levels returned by `log.getLevels()` (including custom levels) can be used as instance methods.** Calling a priority level as a method writes `message` to logging destinations when `log.level` is set to a priority with a `levelIndex` at or above the method's level.
+
+Use of `callback` in logging methods is designed to deal with file I/O and are not very useful if `log.file` is `false`. `callback` takes an argument of `err` to return info if there's a problem with file I/O.
 
 **Example:** Sending strings to the log
 
@@ -248,6 +250,17 @@ log.addLevel('sneeze')
 log.level = 'sneeze' // log.levelIndex('sneeze') === 8
 log.debug('Hark! A bug!') // log.levelIndex('debug') === 7
 // Output: [DEBUG] Hark! A bug!
+```
+
+**Example:** Logging to file using callbacks when a program exits
+```javascript
+process.on('beforeExit', code => {
+  log.info(`Program is exiting with code ${code}`, err => {
+    if (err) throw err
+    // Wait for entry to be written to file before exiting
+    process.exit(code)
+  })
+})
 ```
 
 Priority methods also accept an `Object` of key-value pairs, where the keys represent priority levels and values represent messages to pass. Logging this way allows different information to be passed depending the priority level set in `log.level`.

@@ -45,7 +45,7 @@ class Log {
   }
 
   _addPriorityMethod(level) {
-    this[level] = msg => {
+    this[level] = (msg, callback) => {
       if (isObject(msg)) {
         if (has(msg, this.level) && this.getLevels().includes(this.level))
           return this[level](msg[this.level])
@@ -54,7 +54,7 @@ class Log {
         }
       }
       msg = this.showLabel ? `[${level.toUpperCase()}] ${msg}` : msg
-      this.write(msg, level)
+      this.write(msg, level, callback)
     }
   }
 
@@ -140,7 +140,7 @@ class Log {
 
 
 
-  write(options, level=null) { // Handle output
+  write(options, level=null, callback=null) { // Handle output
     // Output non-object
     if (!isObject(options)) {
       let output = this.prefix ? this.prefix + ' ' + options : options
@@ -160,7 +160,7 @@ class Log {
           this.emit('willWriteFile', f)
           // Append message to log file
           fs.appendFile(this.getFilepath(), output + '\r\n', err => {
-            if (err) throw new Error(err)
+            if (callback) callback(err)
             fs.stat(this.getFilepath(), (err, stats) => {
               f.size = stats.size
               f.modified = stats.mtime
@@ -173,6 +173,7 @@ class Log {
       // Standard output
       if (this.stdout && (!level || this.levelIndexOf(this.outLevel) >= this.levelIndexOf(level))) {
         console.log(output)
+        if (callback && !this.file) callback
       }
       // Entry event
       if (!this.emitHidden) {
