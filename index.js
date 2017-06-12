@@ -31,15 +31,15 @@ class Log {
       this._addPriorityMethod(this.getLevels()[i])
     // Configured properties
     this.level      = opts.level     || 'notice'
-    this.fileLevel  = opts.fileLevel || 'notice'
-    this.outLevel   = opts.outLevel  || 'notice'
+    this.fileLevel  = opts.fileLevel || this.level
+    this.outLevel   = opts.outLevel  || this.level
     this.prefix     = opts.prefix    || '%Y-%m-%d %H:%M:%S -'
     this.dir        = opts.dir       || path.join('./', 'logs')
     this.filename   = opts.filename  || `log_${strftime('%Y%m%d_%H%M%S')}.txt`
-    this.showLabel  = isUndefined(opts.showLabel)  ? true  : false
-    this.stdout     = isUndefined(opts.stdout)     ? true  : false
-    this.file       = isUndefined(opts.file)       ? false : true
-    this.emitHidden = isUndefined(opts.emitHidden) ? false : true
+    this.showLabel  = isUndefined(opts.showLabel)  ? true  : opts.showLabel
+    this.stdout     = isUndefined(opts.stdout)     ? true  : opts.stdout
+    this.file       = isUndefined(opts.file)       ? false : opts.file
+    this.emitHidden = isUndefined(opts.emitHidden) ? false : opts.emitHidden
 
     EventEmitter.call(this)
   }
